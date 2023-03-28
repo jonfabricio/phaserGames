@@ -74,9 +74,9 @@ function create() {
   // setOrigin(0, 1) é importante para definir o ponto de ancoragem do sprite no canto inferior esquerdo, para que a posição do tubo seja definida pelo seu canto inferior esquerdo
   tubo.setOrigin(0.5, 1);
   // setImmovable(true) também é importante para que o tubo não se mova quando colidir com outros objetos.
-  tubo.setCollideWorldBounds(true);
+  tubo.setCollideWorldBounds(false);
   tubo.setImmovable(true);	
-  tubo.body.setAllowGravity(true);
+  tubo.body.setAllowGravity(false);
   
 
   // cria o tubo de cima
@@ -85,7 +85,7 @@ function create() {
   tuboInvertido.setOrigin(0.5, 0);
   tuboInvertido.setCollideWorldBounds(true);
   tuboInvertido.setImmovable(true);
-  tuboInvertido.body.setAllowGravity(true);
+  tuboInvertido.body.setAllowGravity(false);
   
 
   // adiciona os tubos ao grupo
