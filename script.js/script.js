@@ -97,36 +97,33 @@ function aumentarScore() {
 
 
 function gameOver() {
+  music.stop();
+  gameOverText = this.add.text(400, 300, "Game Over", {
+    fontSize: "64px",
+    fill: "#000",
+    align: "center",
+  });
 
-   gameOverText = this.add.text(400, 300, "Game Over", {
-     fontSize: "64px",
-     fill: "#000",
-     align: "center",
-   });
-
-   gameOverText.setOrigin(0.5);
-   gameOverText.setDepth(1); // torna o texto invisível por padrão
-   gameOverText.setVisible(true);
+  gameOverText.setOrigin(0.5);
+  gameOverText.setDepth(1); // torna o texto invisível por padrão
+  gameOverText.setVisible(true);
   jack.setTint(0xff0000);
   this.physics.pause();
 
-  
-    restartButton = this.add.image(400, 500, "restart").setInteractive();
-    restartButton.setVisible(true);
-    restartButton.setOrigin(0.5)
-    restartButton.setDepth(1);
-    restartButton.on(
-      "pointerdown",
-      function () {
-       
-           tubos.clear(true, true); // limpa todos os tubos
-           tuboAtual = 0; // reinicia a variável 'tuboAtual'
-           score = 0; // reinicia a variável 'score'
-           this.scene.restart();
-      },
-      this
-    );
-
+  restartButton = this.add.image(400, 500, "restart").setInteractive();
+  restartButton.setVisible(true);
+  restartButton.setOrigin(0.5);
+  restartButton.setDepth(1);
+  restartButton.on(
+    "pointerdown",
+    function () {
+      tubos.clear(true, true); // limpa todos os tubos
+      tuboAtual = 0; // reinicia a variável 'tuboAtual'
+      score = 0; // reinicia a variável 'score'
+      this.scene.restart();
+    },
+    this
+  );
 
 }
 
