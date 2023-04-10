@@ -21,6 +21,18 @@ var config = {
 
 var game = new Phaser.Game(config);
 
+var score = 0;
+var scoreText;
+var tubo;
+var tubos;
+var tuboInvertido;
+var jack;
+var posicao;
+var gameOverText;
+var tuboAtual = 0;
+var music;
+
+
 // music, animations...
 function preload() {
   //mapa
@@ -35,76 +47,149 @@ function preload() {
 
   //restart
   this.load.image('restart', "assets/restart-button.png");
+
+  // music
+  this.load.audio('music', "assets/soundtrack.mp3");
   
-  //pontuação
-  this.load.image("num0","assets/number0.png");
-  this.load.image("num1", "assets/number1.png");
-  this.load.image("num2", "assets/number2.png");
-  this.load.image("num3", "assets/number3.png");
-  this.load.image("num4", "assets/number4.png");
-  this.load.image("num5", "assets/number5.png");
-  this.load.image("num6", "assets/number6.png");
-  this.load.image("num7", "assets/number7.png");
-  this.load.image("num8", "assets/number8.png");
-  this.load.image("num9", "assets/number9.png");
+}
 
-     
 
+function gerarTubos() {
+  posicao = Math.floor(Math.random() * 250) + 150; // posição aleatória para os tubos
+
+  tubo = tubos.create(game.config.width + 70, posicao - 75, "tubo");
+  tubo.setOrigin(0.2, 1);
+  tubo.body.setAllowGravity(false);
+  tubo.body.setVelocityX(-200);
+  tubo.setScale(0.24);
+
+  tuboInvertido = tubos.create(
+    game.config.width + 70,
+    posicao + 75,
+    "tuboInvertido"
+  );
+  tuboInvertido.setOrigin(0.2, 0);
+  tuboInvertido.body.setAllowGravity(false);
+  tuboInvertido.body.setVelocityX(-200);
+  tuboInvertido.setScale(0.24);
+
+  var conjuntoTubos = this.add.group();
+  conjuntoTubos.add(tubo);
+  conjuntoTubos.add(tuboInvertido);
+  conjuntoTubos.posicaoX = tubo.x;
+  conjuntoTubos.tuboAtual = tuboAtual; // adiciona a posição atual do tubo na variável 'tuboAtual'
+
+  conjuntoTubos.passou = false;
+}
+
+
+function aumentarScore() {
+  if (tubos.getLength() > 0) {
+    var proximoTubo = tubos.getChildren()[tuboAtual];
+    if (proximoTubo.getBounds().right < jack.getBounds().left) {
+      score++;
+      scoreText.setText("Score: " + score);
+      tuboAtual++;
+    }
+  }
 }
 
 
 
-var score = 0;
-var scoreText;
-var tubo;
-var tubos;
-var jack;
+function gameOver() {
+
+   gameOverText = this.add.text(400, 300, "Game Over", {
+     fontSize: "64px",
+     fill: "#000",
+     align: "center",
+   });
+
+   gameOverText.setOrigin(0.5);
+   gameOverText.setDepth(1); // torna o texto invisível por padrão
+   gameOverText.setVisible(true);
+  jack.setTint(0xff0000);
+  this.physics.pause();
+
+  
+    restartButton = this.add.image(400, 500, "restart").setInteractive();
+    restartButton.setVisible(true);
+    restartButton.setOrigin(0.5)
+    restartButton.setDepth(1);
+    restartButton.on(
+      "pointerdown",
+      function () {
+       
+           tubos.clear(true, true); // limpa todos os tubos
+           tuboAtual = 0; // reinicia a variável 'tuboAtual'
+           score = 0; // reinicia a variável 'score'
+           this.scene.restart();
+      },
+      this
+    );
+
+
+}
 
 
 
 
 // interações
 function create() {
+  this.add.image(400, 300, "mapa");
 
-  this.add.image(400,300, 'mapa');
+    music = this.sound.add("music", { loop: true });
+    music.play();
+  
+  // reinicia a pontuação e a posição do jogador
+  score = 0;
 
-//cria os tubos
-tubos = this.physics.add.group();
 
   // movimentação personagem
-  jack = this.physics.add.sprite(100,game.config.height/2,'jack');
+  jack = this.physics.add.sprite(100, game.config.height / 2, "jack");
   jack.setScale(1.8);
-  
-this.input.on(
-  "pointerdown",
-  function () {
-    jack.setVelocityY(-400);
-  },
-  this
-);
+  jack.setGravityY(800); // adiciona a gravidade no eixo Y
 
+  jack.setSize(34, 24, true);
+  jack.setOffset(2, 6);
 
-//   this.tubo = this.physics.sprite(400,300, 'tubo');
-//   tubo.setScale(0.145);
-//   this.tubo.setVelocityX(125);
- 
-//   // // cria o tubo de cima
-//  tuboInvertido = tubos.create(game.config.width / 2, 25, 'tuboInvertido');
-//  tuboInvertido.setScale(0.130);
-//    tuboInvertido.setOrigin(0.5, 0);
-//    tuboInvertido.setCollideWorldBounds(true);
+  this.input.on(
+    "pointerdown",
+    function () {
+      jack.setVelocityY(-400);
+    },
+    this
+  );
 
-  
+  // grupo tubos
+  tubos = this.physics.add.group();
 
+  // adiciona tubos a cada 2 segundos
+  this.time.addEvent({
+    delay: 2000,
+    callback: gerarTubos,
+    callbackScope: this,
+    loop: true,
+  });
 
-   
+  this.physics.add.collider(jack, tubos, gameOver, null, this);
 
+  jack.setCollideWorldBounds(true); // adiciona a detecção de colisão com o mundo
+
+  scoreText = this.add.text(16, 16, "Score: 0", {
+    fontSize: "32px",
+    fill: "#000",
+    stroke: "#fff",
+    strokeThickness: 4,
+  });
+  scoreText.setDepth(1);
 }
-
-	
-
 
 
 function update() {
-      
+
+  aumentarScore();
+  
+    scoreText.setText("Score: " + score);
+
+  
 }
